@@ -1,6 +1,7 @@
 // CarrotSearch backend helpers: ST users, characters and connection profiles.
 const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
 function getStRoot() {
     return path.resolve(__dirname, '..', '..');
@@ -182,6 +183,50 @@ async function listModels(user, profileId) {
     return list.map((m) => (typeof m === 'string' ? m : m.id)).filter(Boolean);
 }
 
+
+// Run ST's own search endpoint with the current user's directories, without a browser session.
+async function invokeSearch(user, source, body, settings) {
+    if (source === 'extras') {
+        const ext = settings.extension_settings || {};
+        if (!ext.apiUrl) throw new Error('请先配置 Extras API 地址');
+        const headers = { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'bypass' };
+        if (ext.apiKey) headers.Authorization = `Bearer ${ext.apiKey}`;
+        const response = await fetch(new URL('/api/websearch', ext.apiUrl), { method:'POST', headers, body:JSON.stringify(body), signal:AbortSignal.timeout(120000) });
+        if (!response.ok) throw new Error(`Extras 搜索失败（HTTP ${response.status}）`);
+        return response.json();
+    }
+    const stRoot = getStRoot();
+    let handler;
+    if (source === 'plugin') {
+        const pluginsDir = path.join(stRoot, 'plugins');
+        const folder = fs.readdirSync(pluginsDir, { withFileTypes:true }).find(entry => entry.isDirectory() && /selenium/i.test(entry.name));
+        if (!folder) throw new Error('请先安装并启用 Selenium 搜索服务端插件');
+        const dir = path.join(pluginsDir, folder.name);
+        let main = 'index.js';
+        try { main = JSON.parse(fs.readFileSync(path.join(dir,'package.json'),'utf8')).main || main; } catch (error) { if (error.code !== 'ENOENT') throw error; }
+        const plugin = await import(pathToFileURL(path.resolve(dir, main)).href);
+        const info = plugin.info || plugin.default?.info;
+        const init = plugin.init || plugin.default?.init;
+        if (info?.id !== 'selenium' || typeof init !== 'function') throw new Error('Selenium 插件无效');
+        await init({ post(route, ...handlers) { if (route === '/search') handler = handlers.at(-1); } });
+    } else {
+        const mod = await import(pathToFileURL(path.join(stRoot,'src','endpoints','search.js')).href);
+        handler = mod.router?.stack?.find(layer => layer.route?.path === `/${source}`)?.route?.stack?.at(-1)?.handle;
+    }
+    if (typeof handler !== 'function') throw new Error(`酒馆未提供 ${source} 搜索接口`);
+    const users = await import(pathToFileURL(path.join(stRoot,'src','users.js')).href);
+    return new Promise((resolve, reject) => {
+        let status = 200;
+        const response = {
+            status(code) { status = code; return this; },
+            sendStatus(code) { status = code; return this.send(''); },
+            json(value) { return this.send(value); },
+            send(value) { if (status >= 400) reject(new Error(`${source} 搜索失败（HTTP ${status}）`)); else resolve(value); return this; },
+        };
+        Promise.resolve(handler({ body, user:{ profile:{ handle:user }, directories:users.getUserDirectories(user) } }, response)).catch(reject);
+    });
+}
+
 // ───────────── AI 调用 ─────────────
 
 async function callAI(user, profileId, model, systemPrompt, messages, { jsonMode = false, signal } = {}) {
@@ -228,4 +273,4 @@ async function callAI(user, profileId, model, systemPrompt, messages, { jsonMode
 }
 
 
-module.exports = { getDataDir, listUsers, listChars, loadCharCard, loadSettings, listProfiles, listModels, resolveApiConnection, callAI };
+module.exports = { invokeSearch, getDataDir, listUsers, listChars, loadCharCard, loadSettings, listProfiles, listModels, resolveApiConnection, callAI };

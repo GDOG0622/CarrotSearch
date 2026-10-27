@@ -14,7 +14,7 @@ function setup() {
     const dependencies = {
         './support': proactive,
         './curiosity-worlds': { createWorldStore: () => store },
-        './curiosity-search': { searchSearxng: () => {} },
+        './curiosity-search': { searchConfiguredSource: () => {} },
         './curiosity-run': { runCuriosityCheck: async args => { runs.push(args); await blocked; await args.save('u', '世界书', {}); return { searched: true }; } },
     };
     const context = vm.createContext({ module: { exports: {} }, require: name => dependencies[name], URL, console, Math, Date,

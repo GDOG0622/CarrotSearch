@@ -32,4 +32,40 @@ async function searchSearxng(baseUrl, query, preferences = '', fetchImpl = fetch
     return parseSearchResults(await response.text());
 }
 
-module.exports = { parseSearchResults, searchSearxng };
+
+function normalizeResults(source, data) {
+    if (source === 'searxng') return parseSearchResults(data);
+    let rows;
+    if (source === 'serpapi') rows = data.organic_results;
+    else if (source === 'serper') rows = data.organic;
+    else if (source === 'tavily') rows = data.results;
+    else if (source === 'zai') rows = data.search_result;
+    else if (source === 'koboldcpp') rows = data;
+    else if (source === 'extras' || source === 'plugin') {
+        // These providers return separate arrays rather than guaranteed paired results.
+        // Keep their text together without falsely attributing snippets to individual URLs.
+        const content = typeof data.results === 'string' ? data.results : '';
+        const links = Array.isArray(data.links) ? data.links : [];
+        rows = links.map(link => ({ link, content: '' }));
+        if (content) rows.unshift({ title: '搜索结果', content });
+    } else throw new Error(`不支持的搜索来源：${source}`);
+    if (!Array.isArray(rows)) throw new Error(`${source} 返回的搜索结果格式不正确`);
+    return rows.slice(0, 15).map(item => ({
+        title: String(item.title || '').slice(0, 500),
+        url: String(item.url || item.link || ''),
+        content: String(item.content || item.snippet || item.desc || '').slice(0, 4000),
+    })).filter(item => item.title || item.url || item.content);
+}
+
+async function searchConfiguredSource({ source, websearch, settings, query, invoke }) {
+    const supported = ['searxng', 'serpapi', 'serper', 'tavily', 'zai', 'koboldcpp', 'extras', 'plugin'];
+    if (!supported.includes(source)) throw new Error(`不支持的搜索来源：${source}`);
+    const body = { query };
+    if (source === 'searxng') Object.assign(body, { baseUrl: websearch.searxng_url, preferences: websearch.searxng_preferences });
+    if (source === 'koboldcpp') body.url = settings.textgenerationwebui_settings?.server_urls?.koboldcpp;
+    if (source === 'extras' || source === 'plugin') Object.assign(body, { engine: websearch.extras_engine, include_images: false });
+    const data = await invoke(source, body, settings);
+    return normalizeResults(source, data);
+}
+
+module.exports = { parseSearchResults, searchSearxng, normalizeResults, searchConfiguredSource };

@@ -1,7 +1,7 @@
 // Autonomous search uses independent timers and never sends chat messages.
 const support = require('./support');
 const { createWorldStore } = require('./curiosity-worlds');
-const { searchSearxng } = require('./curiosity-search');
+const { searchConfiguredSource } = require('./curiosity-search');
 const { runCuriosityCheck } = require('./curiosity-run');
 
 const timersByUser = new Map();
@@ -29,9 +29,11 @@ function stopUser(user) {
 
 function validateConfig(user, config, store) {
     if (!user || !support.listUsers().includes(user)) throw new Error('酒馆用户不存在');
-    if (config.searchSource && config.searchSource !== 'searxng') throw new Error('自主搜索目前只支持 SearXNG，请在上方搜索设置选择 SearXNG');
-    const url = new URL(config.searxngUrl);
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('SearXNG 地址无效');
+    if (config.searchSource === 'searxng' || !config.searchSource) {
+        let url;
+        try { url = new URL(config.searxngUrl); } catch { throw new Error('请在上方搜索设置中填写 SearXNG 地址'); }
+        if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('SearXNG 地址无效');
+    }
     if (!Array.isArray(config.schemes)) throw new Error('搜索方案无效');
     const worlds = new Set(store.list(user));
     const availableChars = new Set(support.listChars(user));
@@ -77,15 +79,15 @@ function startUser(user, config) {
             }
             state.running.add(scheme.id);
             try {
-                const websearch = support.loadSettings(user)?.extension_settings?.websearch || {};
+                const settings = support.loadSettings(user);
+                const websearch = settings?.extension_settings?.websearch || {};
                 const effective = { ...current, searxngUrl: websearch.searxng_url ?? current.searxngUrl, searxngPreferences: websearch.searxng_preferences ?? current.searxngPreferences, searchSource: websearch.source ?? current.searchSource };
-                if (effective.searchSource && effective.searchSource !== 'searxng') throw new Error('自主搜索目前只支持 SearXNG，请在上方搜索设置选择 SearXNG');
                 const result = await runCuriosityCheck({
                     user, config: effective, scheme,
                     loadCard: support.loadCharCard,
                     loadWorld: (u, b) => store.read(u, b),
                     callAI: support.callAI,
-                    search: searchSearxng,
+                    search: (_url, query) => searchConfiguredSource({ source: effective.searchSource || 'searxng', websearch: { ...websearch, searxng_url: effective.searxngUrl, searxng_preferences: effective.searxngPreferences }, settings, query, invoke: (source, body, saved) => support.invokeSearch(user, source, body, saved) }),
                     save: (u, b, record) => {
                         if (!state.active) throw new Error('方案已停止，搜索结果未保存');
                         if (worldIsBeingEdited(u, b)) throw new Error('世界书正在编辑，本次未写入');

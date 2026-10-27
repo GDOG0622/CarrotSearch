@@ -169,7 +169,7 @@ export function initCuriosity() {
     function render() {
         container.innerHTML = `<label class="checkbox_label"><input id="cip-curiosity-enabled" type="checkbox" ${config.enabled ? 'checked' : ''}>启用自主搜索</label>
             <small>自主搜索需要独立的 CarrotSearch 服务端插件。<a href="https://github.com/GDOG0622/CarrotSearch#角色自主搜索" target="_blank" rel="noopener noreferrer">查看安装说明</a></small>
-            <small>使用当前酒馆用户、当前 AI 连接与模型，以及上方搜索设置中的 SearXNG 配置。自主搜索目前仅支持 SearXNG 和自定义 OpenAI 兼容连接。</small>
+            <small>使用当前酒馆用户、当前 AI 连接与模型，以及上方选择的搜索来源和配置。AI 连接目前支持自定义 OpenAI 兼容接口。</small>
             <div class="websearch-curiosity-field"><small>自定义提示词</small><textarea id="cip-curiosity-prompt" class="text_pole" rows="5" ${promptReady ? '' : 'disabled'}></textarea></div>
             <div id="cip-curiosity-schemes"></div><button id="cip-curiosity-add" class="menu_button">+ 添加角色搜索方案</button>
             <div id="cip-curiosity-status" role="status"></div><button id="cip-curiosity-check" class="menu_button">查看运行状态</button>`;

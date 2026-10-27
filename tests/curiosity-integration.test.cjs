@@ -18,6 +18,7 @@ test('timer connects the real decision, SearXNG parsing and paired worldbook sav
         proactive.listUsers = () => ['u']; proactive.listChars = () => ['角色'];
         proactive.loadSettings = () => ({extension_settings:{websearch:{source:'searxng',searxng_url:'http://127.0.0.1:8889',searxng_preferences:'pref'}}});
         proactive.loadCharCard = () => ({name:'角色',description:'角色人设'});
+        proactive.invokeSearch = async (_user, source, body) => { assert.equal(source, 'searxng'); assert.equal(body.query, '小猫'); assert.equal(body.preferences, 'pref'); return '<div id="urls"><article class="result"><a class="url_header" href="https://example.com/cat"><h3>小猫</h3></a><p class="content">猫的习惯</p></article></div>'; };
         proactive.callAI = async (_u, _p, _m, prompt) => {
             aiCalls++;
             if (aiCalls === 1) { assert.match(prompt,/角色人设[\s\S]*自定义[\s\S]*搜索世界书/); return '{"search":true,"query":"小猫"}'; }
