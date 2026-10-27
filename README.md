@@ -14,6 +14,33 @@ node plugin/install.cjs /root/SillyTavern
 
 Windows 同样使用 `node plugin/install.cjs "酒馆根目录"`。安装脚本不会更改酒馆配置或其他插件；更新已有 CarrotSearch 后端时，会先在酒馆 `backups/carrotsearch` 下备份旧版。确认酒馆的 `config.yaml` 中 `enableServerPlugins: true`，然后重启酒馆服务。以后更新了 CarrotSearch 后端，也要重新执行安装脚本并重启，才能载入新版。
 
+### 安卓 Termux 本地酒馆安装后端
+
+如果 SillyTavern 是在安卓手机的 Termux 里运行的，后端也要安装在这台手机的酒馆目录里。先在酒馆扩展管理中安装或更新 CarrotSearch，再打开 Termux：
+
+1. 停止正在运行的酒馆（在启动酒馆的 Termux 会话中按 `Ctrl+C`），然后进入自己的酒馆根目录。下面以常见的 `~/SillyTavern` 为例，实际目录不同就换成自己的路径：
+
+   ```bash
+   cd ~/SillyTavern
+   ```
+
+   可以用 `pwd` 查看当前路径；正确的根目录里应有 `server.js`、`config.yaml` 和 `public`。如果不确定目录，可在启动酒馆的会话中查看启动脚本所在位置。
+
+2. 在酒馆根目录执行以下命令。这里使用当前目录作为酒馆路径；如果安装扩展时使用了不同的文件夹名称，先用 `ls public/scripts/extensions/third-party` 查看并调整路径：
+
+   ```bash
+   cd public/scripts/extensions/third-party/CarrotSearch
+   node plugin/install.cjs "$(cd ../../../../.. && pwd)"
+   ```
+
+   安装脚本会下载所需依赖，需要联网；看到“CarrotSearch 后端已安装”表示安装脚本执行成功。如果提示找不到目录或 `server.js`，请核对酒馆和扩展的实际路径，不要照搬 VPS 的 `/root/SillyTavern`。
+
+3. 确认酒馆根目录 `config.yaml` 中 `enableServerPlugins: true`。可以在 Termux 输入 `nano ~/SillyTavern/config.yaml` 编辑（路径按实际位置修改），保存使用 `Ctrl+O`、回车，退出使用 `Ctrl+X`。保持其他配置不变，然后用平时的方式重新启动酒馆。
+
+4. 在 CarrotSearch 设置中配置「角色自主搜索」。SearXNG 地址应填写手机能够访问的服务地址：如果 SearXNG 部署在 VPS 上，`127.0.0.1` 指的是手机自身，不能填 VPS 的本地地址。定时自主搜索依赖 Termux 中的酒馆进程持续运行；手机休眠、省电或系统结束进程可能让它暂停。
+
+以后通过扩展管理更新 CarrotSearch 后，如后端也有更新，重复第 1–3 步。安装脚本更新后端前会备份旧版，不会修改酒馆配置或其他插件。
+
 在 CarrotSearch 设置中展开「角色自主搜索」，配置 API 连接方案、模型、SearXNG 服务地址和可编辑提示词；为每个角色选择独立的已有世界书、检查间隔和触发方式。还需在 ST 中将该世界书绑定到角色，摘要才会在聊天中按关键词触发。服务器和 SearXNG 在同一台机器时，服务地址通常是 `http://127.0.0.1:8889`，端口以自己的实际部署为准。
 
 后台判断不读取最近聊天：AI 根据角色人设、用户提示词、所选世界书中近期启用的条目和当前时间想象角色可能在做什么，决定是否因好奇、困惑或无聊搜索。真正搜到结果后会生成两条记录：默认关闭的详细搜索记录，以及绿灯关键词触发的摘要。摘要位置为系统、深度 1、顺序 0、触发概率 100%，勾选「不可递归」和「防止进一步递归」。搜索记录包含 SearXNG 返回的标题、链接和摘要；不能保证读取需要登录的内容。
