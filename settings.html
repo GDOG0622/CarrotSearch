@@ -1,21 +1,21 @@
 <div class="websearch_settings">
     <div class="inline-drawer">
         <div class="inline-drawer-toggle inline-drawer-header">
-            <b>Web Search</b>
+            <b>网页搜索</b>
             <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
         <div class="inline-drawer-content">
             <div class="flex-container flexFlowColumn">
                 <label class="checkbox_label" for="websearch_enabled">
                     <input type="checkbox" id="websearch_enabled" />
-                    <span>Enabled</span>
+                    <span>启用</span>
                 </label>
-                <h4>Source</h4>
+                <h4>搜索来源</h4>
                 <select id="websearch_source">
-                    <option value="extras">Extras API (deprecated)</option>
+                    <option value="extras">Extras API（已弃用）</option>
                     <option value="koboldcpp">KoboldCpp</option>
                     <option value="searxng">SearXNG</option>
-                    <option value="plugin">Selenium Plugin</option>
+                    <option value="plugin">Selenium 插件</option>
                     <option value="serpapi">SerpApi</option>
                     <option value="serper">Serper</option>
                     <option value="tavily">Tavily</option>
@@ -24,11 +24,11 @@
                 <div id="serpapi_settings">
                     <div class="flex-container alignItemsBaseline">
                         <h4 for="serpapi_key" class="flex1 margin0">
-                            <a href="https://serpapi.com/" target="_blank" rel="noopener noreferrer">SerpApi Key</a>
+                            <a href="https://serpapi.com/" target="_blank" rel="noopener noreferrer">SerpApi 密钥</a>
                         </h4>
                         <div id="serpapi_key" class="menu_button menu_button_icon">
                             <i class="fa-solid fa-key"></i>
-                            <span>Click to set</span>
+                            <span>点击设置</span>
                         </div>
                     </div>
                 </div>
@@ -40,13 +40,13 @@
                             </a>
                         </strong>
                     </div>
-                    <label for="websearch_searxng_url">Base URL</label>
+                    <label for="websearch_searxng_url">服务地址</label>
                     <input type="text" class="text_pole" id="websearch_searxng_url" value="">
-                    <label for="websearch_searxng_preferences">SearXNG preferences string</label>
+                    <label for="websearch_searxng_preferences">SearXNG 偏好设置字符串</label>
                     <input type="text" class="text_pole" id="websearch_searxng_preferences" value="">
                 </div>
                 <div id="websearch_extras_settings">
-                    <label for="websearch_extras_engine">Engine</label>
+                    <label for="websearch_extras_engine">搜索引擎</label>
                     <select id="websearch_extras_engine">
                         <option value="google">Google</option>
                         <option value="duckduckgo">DuckDuckGo</option>
@@ -55,135 +55,135 @@
                 <div id="websearch_tavily_settings">
                     <div class="flex-container alignItemsBaseline">
                         <h4 for="tavily_key" class="flex1 margin0">
-                            <a href="https://app.tavily.com/" target="_blank" rel="noopener noreferrer">Tavily AI Key</a>
+                            <a href="https://app.tavily.com/" target="_blank" rel="noopener noreferrer">Tavily AI 密钥</a>
                         </h4>
                         <div id="tavily_key" class="menu_button menu_button_icon">
                             <i class="fa-solid fa-key"></i>
-                            <span>Click to set</span>
+                            <span>点击设置</span>
                         </div>
                     </div>
                 </div>
                 <div id="websearch_serper_settings">
                     <div class="flex-container alignItemsBaseline">
                         <h4 for="serper_key" class="flex1 margin0">
-                            <a href="https://serper.dev/" target="_blank" rel="noopener noreferrer">Serper Key</a>
+                            <a href="https://serper.dev/" target="_blank" rel="noopener noreferrer">Serper 密钥</a>
                         </h4>
                         <div id="serper_key" class="menu_button menu_button_icon">
                             <i class="fa-solid fa-key"></i>
-                            <span>Click to set</span>
+                            <span>点击设置</span>
                         </div>
                     </div>
                 </div>
                 <div id="websearch_koboldcpp_settings">
-                    <b>Hint:</b>
+                    <b>提示：</b>
                     <span>
-                        Set the KoboldCpp URL in the Text Completion API connection settings.
+                        请在文本补全 API 连接设置中填写 KoboldCpp 地址。
                     </span>
                     <span>
-                        Must use version 1.18.1 or higher and have WebSearch option enabled.
+                        需要使用 1.81.1 或更高版本，并启用 WebSearch 选项。
                     </span>
                 </div>
                 <div id="websearch_zai_settings">
-                    <b>Hint:</b>
+                    <b>提示：</b>
                     <span>
-                        Set the API Key in the Chat Completion API connection settings.
+                        请在聊天补全 API 连接设置中填写 API 密钥。
                     </span>
-                    <b>Will use Common API. Coding API is not supported!</b>
+                    <b>使用通用 API，不支持 Coding API！</b>
                 </div>
-                <label for="websearch_cache_lifetime">Cache Lifetime <small>(seconds)</small></label>
+                <label for="websearch_cache_lifetime">缓存有效期 <small>（秒）</small></label>
                 <input type="number" class="text_pole" id="websearch_cache_lifetime" value="">
                 <hr>
-                <h4>Prompt Settings</h4>
-                <label for="websearch_budget">Prompt Budget <small>(text characters)</small></label>
+                <h4>提示词设置</h4>
+                <label for="websearch_budget">提示词字数上限 <small>（文本字符数）</small></label>
                 <input type="number" class="text_pole" id="websearch_budget" value="">
-                <label for="websearch_template">Injection Template</label>
-                <textarea id="websearch_template" class="text_pole textarea_compact autoSetHeight" rows="2" placeholder="Use {{query}} and {{text}} macro."></textarea>
-                <label for="websearch_position">Injection Position</label>
+                <label for="websearch_template">注入模板</label>
+                <textarea id="websearch_template" class="text_pole textarea_compact autoSetHeight" rows="2" placeholder="可使用 {{query}} 和 {{text}} 宏。"></textarea>
+                <label for="websearch_position">注入位置</label>
                 <div class="radio_group">
                     <label>
                         <input type="radio" name="websearch_position" value="-1" />
-                        None (do not inject)
+                        无（不注入）
                     </label>
                     <label>
                         <input type="radio" name="websearch_position" value="2" />
-                        Before Main Prompt / Story String
+                        主提示词 / 故事字符串之前
                     </label>
                     <!--Keep these as 0 and 1 to interface with the setExtensionPrompt function-->
                     <label>
                         <input type="radio" name="websearch_position" value="0" />
-                        After Main Prompt / Story String
+                        主提示词 / 故事字符串之后
                     </label>
                     <label>
                         <input type="radio" name="websearch_position" value="1" />
-                        In-chat @ Depth <input id="websearch_depth" class="text_pole widthUnset" type="number" min="0" max="999" />
+                        聊天中，深度 <input id="websearch_depth" class="text_pole widthUnset" type="number" min="0" max="999" />
                     </label>
                 <hr>
-                <h4>Search Activation</h4>
+                <h4>搜索触发方式</h4>
                 <label class="checkbox_label" for="websearch_use_function_tool">
                     <input type="checkbox" id="websearch_use_function_tool" />
-                    <span>Use function tool</span>
+                    <span>使用函数工具调用</span>
                 </label>
                 <label class="checkbox_label" for="websearch_use_backticks">
                     <input type="checkbox" id="websearch_use_backticks" />
-                    <span>Use `Backticks`</span>
+                    <span>使用 `反引号`</span>
                 </label>
                 <label class="checkbox_label" for="websearch_use_regex">
                     <input type="checkbox" id="websearch_use_regex" />
-                    <span>Use Regex</span>
+                    <span>使用正则表达式</span>
                 </label>
                 <div id="websearch_regex_block" class="flex flexFlowColumn">
-                    <label>Regex Rules</label>
-                    <div class="menu_button menu_button_icon" id="websearch_regex_add" title="Create a new regex rule">
+                    <label>正则规则</label>
+                    <div class="menu_button menu_button_icon" id="websearch_regex_add" title="新建正则规则">
                         <i class="fa-solid fa-plus"></i>
-                        <span>Add Regex</span>
+                        <span>添加正则规则</span>
                     </div>
                     <div id="websearch_regex_list" class="wide100p flex-container flexFlowColumn"></div>
                 </div>
                 <label class="checkbox_label" for="websearch_use_trigger_phrases">
                     <input type="checkbox" id="websearch_use_trigger_phrases" />
-                    <span>Use Trigger Phrases</span>
+                    <span>使用触发词</span>
                 </label>
                 <div id="websearch_trigger_phrases_block" class="flex-container flexFlowColumn">
-                    <label for="websearch_trigger_phrases">Trigger Phrases <small>(one per line)</small></label>
-                    <small>If a message starts with a period, it will be ignored.</small>
+                    <label for="websearch_trigger_phrases">触发词 <small>（每行一个）</small></label>
+                    <small>以英文句号开头的消息会被忽略。</small>
                     <textarea id="websearch_trigger_phrases" class="text_pole textarea_compact" rows="4"></textarea>
-                    <label for="websearch_max_words">Max Words <small>(per query)</small></label>
+                    <label for="websearch_max_words">最大词数 <small>（每次搜索）</small></label>
                     <input type="number" class="text_pole" id="websearch_max_words" value="" min="1" max="32" step="1">
                 </div>
                 <hr>
-                <h4>Page Scraping</h4>
+                <h4>网页抓取</h4>
                 <label class="checkbox_label" for="websearch_visit_enabled">
                     <input type="checkbox" id="websearch_visit_enabled" />
-                    <span>Visit Links</span>
+                    <span>访问搜索结果链接</span>
                 </label>
                 <label class="checkbox_label" for="websearch_include_images">
                     <input type="checkbox" id="websearch_include_images" />
-                    <span>Include Images</span>
-                    <small>(not all sources supported)</small>
+                    <span>包含图片</span>
+                    <small>（仅部分来源支持）</small>
                 </label>
                 <div class="marginTopBot5">
-                    Text will be extracted from the visited search result pages and saved to:
+                    从访问的搜索结果页面提取文本，并保存到：
                 </div>
                 <label for="websearch_visit_target_none" class="checkbox_label">
                     <input id="websearch_visit_target_none" type="radio" name="websearch_visit_target" value="2" />
-                    <span>None (just images)</span>
+                    <span>不保存文本（仅图片）</span>
                 </label>
                 <label for="websearch_visit_target_message" class="checkbox_label">
                     <input id="websearch_visit_target_message" type="radio" name="websearch_visit_target" value="0" />
-                    <span>Message attachment</span>
+                    <span>消息附件</span>
                 </label>
                 <label for="websearch_visit_target_databank" class="checkbox_label">
                     <input id="websearch_visit_target_databank" type="radio" name="websearch_visit_target" value="1" />
-                    <span>Data Bank (chat)</span>
+                    <span>资料库（当前聊天）</span>
                 </label>
-                <label for="websearch_visit_count">Visit Count <small>(max per query)</small></label>
+                <label for="websearch_visit_count">访问数量 <small>（每次搜索的上限）</small></label>
                 <input type="number" class="text_pole" id="websearch_visit_count" value="" min="0" max="10" step="1">
-                <label for="websearch_visit_blacklist">Visit Domain Blacklist <small>(one per line)</small></label>
+                <label for="websearch_visit_blacklist">访问域名黑名单 <small>（每行一个）</small></label>
                 <textarea id="websearch_visit_blacklist" class="text_pole textarea_compact" rows="4"></textarea>
-                <label for="websearch_file_header">File Header</label>
-                <textarea id="websearch_file_header" class="text_pole textarea_compact autoSetHeight" rows="2" placeholder="Use &lcub;&lcub;query&rcub;&rcub; macro."></textarea>
-                <label for="websearch_block_header">Block Header</label>
-                <textarea id="websearch_block_header" class="text_pole textarea_compact autoSetHeight" rows="2" placeholder="Use &lcub;&lcub;link&rcub;&rcub; and &lcub;&lcub;text&rcub;&rcub; macros."></textarea>
+                <label for="websearch_file_header">文件开头模板</label>
+                <textarea id="websearch_file_header" class="text_pole textarea_compact autoSetHeight" rows="2" placeholder="可使用 &lcub;&lcub;query&rcub;&rcub; 宏。"></textarea>
+                <label for="websearch_block_header">网页内容模板</label>
+                <textarea id="websearch_block_header" class="text_pole textarea_compact autoSetHeight" rows="2" placeholder="可使用 &lcub;&lcub;link&rcub;&rcub; 和 &lcub;&lcub;text&rcub;&rcub; 宏。"></textarea>
                 </div>
             </div>
         </div>

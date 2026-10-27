@@ -1,42 +1,42 @@
 <div class="m-b-1">
     <div class="flex-container flexFlowColumn">
         <label for="searchScrapeQuery">
-            Enter a search query:
+            输入搜索内容：
         </label>
-        <input type="text" id="searchScrapeQuery" name="searchScrapeQuery" class="text_pole wide100p" placeholder="Search for...">
+        <input type="text" id="searchScrapeQuery" name="searchScrapeQuery" class="text_pole wide100p" placeholder="搜索内容…">
         <label for="searchScrapeMaxResults">
-            Max number of results:
+            最多抓取结果数：
         </label>
-        <input type="number" id="searchScrapeMaxResults" name="searchScrapeMaxResults" class="text_pole wide100p" min="0" max="10" placeholder="Max results...">
+        <input type="number" id="searchScrapeMaxResults" name="searchScrapeMaxResults" class="text_pole wide100p" min="0" max="10" placeholder="结果数量上限…">
         <label for="searchScrapeSnippets" class="checkbox_label">
             <input type="checkbox" id="searchScrapeSnippets" name="searchScrapeSnippets" value="true">
-            <span data-i18n="Save snippets">
-                Save page snippets
+            <span>
+                保存网页摘要
             </span>
         </label>
         <div class="flex-container flexFlowColumn">
             <label>
-                Output format:
+                输出格式：
             </label>
             <label class="checkbox_label justifyLeft" for="searchScrapeOutputMulti">
                 <input id="searchScrapeOutputMulti" type="radio" name="searchScrapeOutput" value="multi" checked>
                 <div class="flex-container flexFlowColumn flexNoGap">
-                    <span data-i18n="File per site">
-                        File per site
+                    <span>
+                        每个网站单独保存
                     </span>
-                    <small data-i18n="Each result will be saved as a separate file.">
-                        Each result will be saved as a separate file.
+                    <small>
+                        每条结果保存为单独的文件。
                     </small>
                 </div>
             </label>
             <label class="checkbox_label justifyLeft" for="searchScrapeOutputSingle">
                 <input id="searchScrapeOutputSingle" type="radio" name="searchScrapeOutput" value="single">
                 <div class="flex-container flexFlowColumn flexNoGap">
-                    <span data-i18n="Single file">
-                        Single file
+                    <span>
+                        合并为一个文件
                     </span>
-                    <small data-i18n="All results will be concatenated into a single file.">
-                        All results will be concatenated into a single file.
+                    <small>
+                        所有结果合并保存到一个文件中。
                     </small>
                 </div>
             </label>

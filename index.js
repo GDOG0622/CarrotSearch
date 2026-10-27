@@ -17,6 +17,8 @@ const supportsMediaArrays = typeof ensureMessageMediaIsArray === 'function';
 
 const storage = localforage.createInstance({ name: 'SillyTavern_WebSearch' });
 const extensionPromptMarker = '___WebSearch___';
+// SillyTavern installs third-party extensions under their repository folder name.
+const extensionTemplatePath = `third-party/${decodeURIComponent(new URL(import.meta.url).pathname.split('/').at(-2))}`;
 
 const WEBSEARCH_SOURCES = {
     SERPAPI: 'serpapi',
@@ -144,7 +146,7 @@ function createRegexRule() {
 async function renderRegexRules() {
     $('#websearch_regex_list').empty();
     for (const rule of extension_settings.websearch.regex) {
-        const template = $(await renderExtensionTemplateAsync('third-party/Extension-WebSearch', 'regex'));
+        const template = $(await renderExtensionTemplateAsync(extensionTemplatePath, 'regex'));
         template.find('.websearch_regex_pattern').val(rule.pattern).on('input', function () {
             rule.pattern = String($(this).val());
             saveSettingsDebounced();
@@ -713,7 +715,7 @@ async function isFileExistsInDataBank(query) {
         return false;
     } catch (error) {
         // Prevent visiting links if the Data Bank is not available
-        toastr.error('Data Bank module is not available');
+        toastr.error('资料库模块不可用');
         console.error('WebSearch: failed to check if the file exists in the Data Bank', error);
         return true;
     }
@@ -1387,8 +1389,8 @@ window['WebSearch_Intercept'] = onWebSearchPrompt;
 class WebSearchScraper {
     constructor() {
         this.id = 'websearch';
-        this.name = 'Web Search';
-        this.description = 'Perform a web search and download the results.';
+        this.name = '网页搜索';
+        this.description = '搜索网页并下载搜索结果。';
         this.iconClass = 'fa-solid fa-search';
         this.iconAvailable = true;
     }
@@ -1407,7 +1409,7 @@ class WebSearchScraper {
      */
     async scrape() {
         try {
-            const template = $(await renderExtensionTemplateAsync('third-party/Extension-WebSearch', 'search-scrape', {}));
+            const template = $(await renderExtensionTemplateAsync(extensionTemplatePath, 'search-scrape', {}));
             let query = '';
             let maxResults = extension_settings.websearch.visit_count;
             let output = 'multiple';
@@ -1425,13 +1427,13 @@ class WebSearchScraper {
                 snippets = $(this).prop('checked');
             });
 
-            const confirm = await callGenericPopup(template, POPUP_TYPE.CONFIRM, '', { okButton: 'Scrape', cancelButton: 'Cancel' });
+            const confirm = await callGenericPopup(template, POPUP_TYPE.CONFIRM, '', { okButton: '抓取', cancelButton: '取消' });
 
             if (!confirm) {
                 return;
             }
 
-            const toast = toastr.info('Working, please wait...');
+            const toast = toastr.info('正在搜索并抓取，请稍候…');
             const searchResult = await performSearchRequest(query, { useCache: false });
 
             if (!Array.isArray(searchResult?.links) || searchResult.links.length === 0) {
@@ -1602,23 +1604,23 @@ function registerFunctionTools() {
  * @param {JQuery} buttonElement - jQuery button element reference
  */
 async function handleApiKeyManagement(keyType, serviceName, buttonElement) {
-    const key = await callGenericPopup(`Add a ${serviceName} key`, POPUP_TYPE.INPUT, '', {
+    const key = await callGenericPopup(`设置 ${serviceName} 密钥`, POPUP_TYPE.INPUT, '', {
         rows: 2,
         customButtons: [{
-            text: 'Remove Key',
+            text: '删除密钥',
             appendAtEnd: true,
             result: POPUP_RESULT.NEGATIVE,
             action: async () => {
                 await writeSecret(keyType, '');
                 buttonElement.toggleClass('success', !!secret_state[keyType]);
-                toastr.success('API Key removed');
+                toastr.success('API 密钥已删除');
             },
         }],
     });
 
     if (key) {
         await writeSecret(keyType, String(key).trim());
-        toastr.success('API Key saved');
+        toastr.success('API 密钥已保存');
     }
 
     buttonElement.toggleClass('success', !!secret_state[keyType]);
@@ -1636,7 +1638,7 @@ jQuery(async () => {
         }
     }
 
-    const html = await renderExtensionTemplateAsync('third-party/Extension-WebSearch', 'settings');
+    const html = await renderExtensionTemplateAsync(extensionTemplatePath, 'settings');
 
     function switchSourceSettings() {
         $('#websearch_extras_settings').toggle(extension_settings.websearch.source === WEBSEARCH_SOURCES.EXTRAS || extension_settings.websearch.source === WEBSEARCH_SOURCES.PLUGIN);
@@ -1795,12 +1797,12 @@ jQuery(async () => {
     registerDebugFunction('clearWebSearchCache', 'Clear the WebSearch cache', 'Removes all search results stored in the local cache.', async () => {
         await storage.clear();
         console.log('WebSearch: cache cleared');
-        toastr.success('WebSearch: cache cleared');
+        toastr.success('网页搜索缓存已清除');
     });
 
     registerDebugFunction('testWebSearch', 'Test the WebSearch extension', 'Performs a test search using the current settings.', async () => {
         try {
-            const text = prompt('Enter a test message', 'How to make a sandwich');
+            const text = prompt('输入测试消息', 'How to make a sandwich');
 
             if (!text) {
                 return;
@@ -1810,7 +1812,7 @@ jQuery(async () => {
             console.log('WebSearch: test result', text, result.text, result.links);
             alert(result.text);
         } catch (error) {
-            toastr.error(String(error), 'WebSearch: test failed');
+            toastr.error(String(error), '网页搜索测试失败');
         }
     });
 
@@ -1852,12 +1854,12 @@ jQuery(async () => {
             const includeLinks = isTrueBoolean(String(args.links));
 
             if (!query) {
-                toastr.warning('No search query specified');
+                toastr.warning('未填写搜索内容');
                 return '';
             }
 
             if (!includeSnippets && !includeLinks) {
-                toastr.warning('No search result type specified');
+                toastr.warning('未指定搜索结果类型');
                 return '';
             }
 
