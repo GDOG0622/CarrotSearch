@@ -4,7 +4,6 @@ const { buildDecisionPrompt, buildSummaryPrompt, parseDecision, parseSummary } =
 
 async function runCuriosityCheck({ user, config, scheme, loadCard, loadWorld, callAI, search, save, now = () => new Date(), random = Math.random, makeId = randomUUID }) {
     if (!scheme?.charName || !scheme?.worldBook) throw new Error('请先为角色选择搜索世界书');
-    if (!config?.apiProfileId) throw new Error('请先选择 API 方案');
     const card = await loadCard(user, scheme.charName);
     const world = await loadWorld(user, scheme.worldBook);
     const recent = Object.values(world.entries || {})

@@ -185,9 +185,17 @@ async function listModels(user, profileId) {
 // ───────────── AI 调用 ─────────────
 
 async function callAI(user, profileId, model, systemPrompt, messages, { jsonMode = false, signal } = {}) {
-    const { apiUrl, apiKey, profileModel } = resolveApiConnection(user, profileId);
-    const finalModel = model || profileModel;
-    if (!finalModel) throw new Error('没有可用的模型：请在自主搜索设置里选一个模型，或使用已配置模型的连接方案');
+    const settings = loadSettings(user);
+    const current = settings.oai_settings || {};
+    if (settings.main_api !== 'openai' || current.chat_completion_source !== 'custom') {
+        throw new Error('自主搜索目前只支持酒馆的自定义 OpenAI 兼容连接');
+    }
+    const apiUrl = String(current.custom_url || '').replace(/\/+$/, '');
+    const finalModel = current.custom_model;
+    if (!apiUrl || !finalModel) throw new Error('请先在酒馆 API 连接中设置自定义地址和模型');
+    let secrets = {};
+    try { secrets = JSON.parse(fs.readFileSync(path.join(getUserDir(user), 'secrets.json'), 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    const apiKey = secrets.api_key_custom?.find?.(secret => secret.active)?.value || '';
 
     const body = {
         model: finalModel,

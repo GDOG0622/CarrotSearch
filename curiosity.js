@@ -16,7 +16,7 @@ export function initCuriosity() {
     const container = document.getElementById('curiosity-container');
     if (!container) return;
     const config = extension_settings.websearch.curiosity;
-    let users = [], chars = [], worlds = [], profiles = [], models = [], status = '';
+    let chars = [], worlds = [], status = '';
     let timer = null, revision = 0, queue = Promise.resolve(), promptReady = false;
     const bookRevisions = new Map();
     const warnedBooks = new Set();
@@ -57,7 +57,10 @@ export function initCuriosity() {
         const current = ++revision;
         timer = setTimeout(() => {
             const snapshot = JSON.parse(JSON.stringify(config));
-            if (!snapshot.stUser) { updateStatus('请先选择酒馆用户'); return; }
+            if (!snapshot.stUser) { updateStatus('无法识别当前酒馆用户'); return; }
+            snapshot.searxngUrl = extension_settings.websearch.searxng_url || '';
+            snapshot.searxngPreferences = extension_settings.websearch.searxng_preferences || '';
+            snapshot.searchSource = extension_settings.websearch.source;
             if (snapshot.enabled && !promptReady) { updateStatus('请安装 CarrotSearch 后端并重启酒馆'); return; }
             updateStatus('正在同步…');
             queue = queue.then(async () => {
@@ -75,11 +78,9 @@ export function initCuriosity() {
         const settled = await Promise.allSettled([
             request(`${API}/curiosity/chars?user=${user}`),
             request(`${API}/curiosity/worlds?user=${user}`),
-            request(`${API}/curiosity/profiles?user=${user}`),
         ]);
         chars = settled[0].status === 'fulfilled' ? settled[0].value.chars || [] : [];
         worlds = settled[1].status === 'fulfilled' ? settled[1].value.worlds || [] : [];
-        profiles = settled[2].status === 'fulfilled' ? settled[2].value.profiles || [] : [];
         const failed = settled.find(item => item.status === 'rejected');
         if (failed) updateStatus(`读取设置失败：${failed.reason.message}`);
     }
@@ -168,36 +169,16 @@ export function initCuriosity() {
     function render() {
         container.innerHTML = `<label class="checkbox_label"><input id="cip-curiosity-enabled" type="checkbox" ${config.enabled ? 'checked' : ''}>启用自主搜索</label>
             <small>自主搜索需要独立的 CarrotSearch 服务端插件。<a href="https://github.com/GDOG0622/CarrotSearch#角色自主搜索" target="_blank" rel="noopener noreferrer">查看安装说明</a></small>
-            <div class="websearch-curiosity-field"><small>酒馆用户</small><select id="cip-curiosity-user" class="text_pole">${users.map(user => option(user, user, config.stUser)).join('')}</select></div>
-            <div class="websearch-curiosity-field"><small>API 方案</small><select id="cip-curiosity-profile" class="text_pole">${option('', '选择 API 方案…', config.apiProfileId)}${profiles.map(item => option(item.id, item.name, config.apiProfileId)).join('')}</select></div>
-            <div class="websearch-curiosity-field"><small>模型（可选，不选则使用方案自带模型）</small><div style="display:flex;gap:.4em"><select id="cip-curiosity-model" class="text_pole" style="flex:1;min-width:0">${option('', '使用方案自带模型', config.apiModel)}${models.map(model => option(model, model, config.apiModel)).join('')}${config.apiModel && !models.includes(config.apiModel) ? option(config.apiModel, config.apiModel, config.apiModel) : ''}</select><button id="cip-curiosity-load-models" class="menu_button">拉取模型</button></div></div>
-            <div class="websearch-curiosity-field"><small>SearXNG 服务地址</small><input id="cip-curiosity-url" class="text_pole" type="url" placeholder="http://127.0.0.1:8889"><small>填写酒馆服务器可访问的地址；与酒馆在同一台服务器时可使用本机地址。</small></div>
-            <div class="websearch-curiosity-field"><small>SearXNG 偏好设置字符串（可留空）</small><input id="cip-curiosity-preferences" class="text_pole"></div>
+            <small>使用当前酒馆用户、当前 AI 连接与模型，以及上方搜索设置中的 SearXNG 配置。自主搜索目前仅支持 SearXNG 和自定义 OpenAI 兼容连接。</small>
             <div class="websearch-curiosity-field"><small>自定义提示词</small><textarea id="cip-curiosity-prompt" class="text_pole" rows="5" ${promptReady ? '' : 'disabled'}></textarea></div>
             <div id="cip-curiosity-schemes"></div><button id="cip-curiosity-add" class="menu_button">+ 添加角色搜索方案</button>
             <div id="cip-curiosity-status" role="status"></div><button id="cip-curiosity-check" class="menu_button">查看运行状态</button>`;
-        container.querySelector('#cip-curiosity-url').value = config.searxngUrl || '';
-        container.querySelector('#cip-curiosity-preferences').value = config.searxngPreferences || '';
         container.querySelector('#cip-curiosity-prompt').value = config.customPrompt || '';
         updateStatus(status);
         const list = container.querySelector('#cip-curiosity-schemes');
         for (const scheme of config.schemes) list.append(renderScheme(scheme));
         container.querySelector('#cip-curiosity-enabled').onchange = e => { config.enabled = e.target.checked; if (config.enabled) delete config.migratedFromCarrot; persist(); };
-        container.querySelector('#cip-curiosity-user').onchange = async e => {
-            const old = config.stUser;
-            if (old && old !== e.target.value) { try { await request(`${API}/curiosity/stop`, { stUser: old }); } catch (error) { e.target.value = old; updateStatus(`旧用户方案停止失败：${error.message}`); return; } }
-            config.stUser = e.target.value; config.apiProfileId = ''; config.apiModel = ''; models = []; await loadUserData(); persist(); render();
-        };
-        container.querySelector('#cip-curiosity-profile').onchange = e => { config.apiProfileId = e.target.value; config.apiModel = ''; models = []; persist(); render(); };
-        container.querySelector('#cip-curiosity-model').onchange = e => { config.apiModel = e.target.value; persist(); };
-        container.querySelector('#cip-curiosity-load-models').onclick = async () => {
-            if (!config.apiProfileId) { updateStatus('请先选择 API 方案'); return; }
-            try { const data = await request(`${API}/curiosity/models?user=${encodeURIComponent(config.stUser)}&profileId=${encodeURIComponent(config.apiProfileId)}`); models = data.models || []; updateStatus(`已读取 ${models.length} 个模型`); render(); }
-            catch (error) { updateStatus(`拉取模型失败：${error.message}`); }
-        };
-        for (const [selector, key] of [['#cip-curiosity-url', 'searxngUrl'], ['#cip-curiosity-preferences', 'searxngPreferences'], ['#cip-curiosity-prompt', 'customPrompt']]) {
-            container.querySelector(selector).oninput = e => { config[key] = e.target.value; persist(); };
-        }
+        container.querySelector('#cip-curiosity-prompt').oninput = e => { config.customPrompt = e.target.value; persist(); };
         container.querySelector('#cip-curiosity-add').onclick = () => {
             const scheme = { id: makeId(), enabled: false, charName: '', worldBook: '', intervalMinutes: 60, mode: 'ai', probability: 50 };
             config.schemes.push(scheme); editing.add(scheme.id); render();
@@ -216,8 +197,8 @@ export function initCuriosity() {
     (async () => {
         try {
             const [userData, defaults] = await Promise.all([request(`${API}/curiosity/users`), request(`${API}/curiosity/defaults`)]);
-            users = userData.users || [];
-            if (!config.stUser || !users.includes(config.stUser)) config.stUser = users[0] || '';
+            config.stUser = userData.users?.[0] || '';
+            saveSettingsDebounced();
             if (typeof config.customPrompt !== 'string') { config.customPrompt = defaults.customPrompt; saveSettingsDebounced(); }
             promptReady = true;
             await loadUserData();
@@ -232,6 +213,10 @@ export function initCuriosity() {
             document.addEventListener('click', scheduleEditorPresence);
             document.addEventListener('change', scheduleEditorPresence);
             document.addEventListener('visibilitychange', scheduleEditorPresence);
+            for (const id of ['websearch_source', 'websearch_searxng_url', 'websearch_searxng_preferences']) {
+                document.getElementById(id)?.addEventListener('input', () => { if (config.enabled) persist(); });
+                document.getElementById(id)?.addEventListener('change', () => { if (config.enabled) persist(); });
+            }
             updateEditorPresence();
             syncWorldCaches();
         } catch (error) { updateStatus(`无法加载自主搜索：${error.message}；请先安装或更新 CarrotSearch 后端并重启酒馆`); render(); }

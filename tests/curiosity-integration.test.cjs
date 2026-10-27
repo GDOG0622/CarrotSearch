@@ -16,6 +16,7 @@ test('timer connects the real decision, SearXNG parsing and paired worldbook sav
         fs.writeFileSync(bookPath, JSON.stringify({ entries:{ 7:{uid:7,content:'旧条目'} } }));
         proactive.getDataDir = () => root;
         proactive.listUsers = () => ['u']; proactive.listChars = () => ['角色'];
+        proactive.loadSettings = () => ({extension_settings:{websearch:{source:'searxng',searxng_url:'http://127.0.0.1:8889',searxng_preferences:'pref'}}});
         proactive.loadCharCard = () => ({name:'角色',description:'角色人设'});
         proactive.callAI = async (_u, _p, _m, prompt) => {
             aiCalls++;
@@ -25,6 +26,7 @@ test('timer connects the real decision, SearXNG parsing and paired worldbook sav
         };
         global.fetch = async url => {
             assert.equal(new URL(url).searchParams.get('q'),'小猫');
+            assert.equal(new URL(url).searchParams.get('preferences'),'pref');
             return {ok:true,text:async()=>'<div id="urls"><article class="result"><a class="url_header" href="https://example.com/cat"><h3>小猫</h3></a><p class="content">猫的习惯</p></article></div>'};
         };
         global.setInterval = fn => { tick=fn; return 1; }; global.clearInterval = () => {};

@@ -142,3 +142,14 @@
     cursor: pointer;
     padding: 0.2em 0;
 }
+
+/* ST's icon-button rules can shrink buttons inside narrow settings panels. */
+#curiosity-container button.menu_button {
+    width: auto;
+    min-width: max-content;
+    max-width: 100%;
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
+    flex: 0 0 auto;
+}

@@ -9,7 +9,7 @@ test('autonomous search panel configures an independent role and bound worldbook
     const posts = [];
     const source = fs.readFileSync(path.join(__dirname, '../curiosity.js'), 'utf8');
     const server = http.createServer((req, res) => {
-        if (req.url === '/') { res.setHeader('content-type', 'text/html; charset=utf-8'); res.end(`<link rel="stylesheet" href="/assets/style.css"><style>body{margin:8px}.text_pole{box-sizing:border-box;max-width:100%}button{white-space:nowrap}</style><div id="curiosity-container"></div><script>window.state={websearch:{curiosity:{enabled:false,stUser:'',apiProfileId:'',apiModel:'',customPrompt:null,searxngUrl:'',searxngPreferences:'',schemes:[]}}};window.SillyTavern={getContext:()=>({eventTypes:{},eventSource:{on(){}}})}</script><script type="module">import {initCuriosity} from '/scripts/extensions/third-party/CarrotSearch/curiosity.js';initCuriosity()</script>`); return; }
+        if (req.url === '/') { res.setHeader('content-type', 'text/html; charset=utf-8'); res.end(`<link rel="stylesheet" href="/assets/style.css"><style>body{margin:8px}.text_pole{box-sizing:border-box;max-width:100%}button{white-space:nowrap}</style><div id="curiosity-container"></div><script>window.state={websearch:{source:'searxng',searxng_url:'http://127.0.0.1:8889',searxng_preferences:'pref',curiosity:{enabled:false,stUser:'',apiProfileId:'',apiModel:'',customPrompt:null,searxngUrl:'',searxngPreferences:'',schemes:[]}}};window.SillyTavern={getContext:()=>({eventTypes:{},eventSource:{on(){}}})}</script><script type="module">import {initCuriosity} from '/scripts/extensions/third-party/CarrotSearch/curiosity.js';initCuriosity()</script>`); return; }
         if (req.url === '/assets/style.css') { res.setHeader('content-type', 'text/css'); res.end(fs.readFileSync(path.join(__dirname, '../style.css'))); return; }
         if (req.url.endsWith('/curiosity.js')) { res.setHeader('content-type', 'text/javascript'); res.end(source); return; }
         if (req.url.endsWith('/extensions.js')) { res.setHeader('content-type', 'text/javascript'); res.end('export const extension_settings=window.state'); return; }
@@ -35,8 +35,7 @@ test('autonomous search panel configures an independent role and bound worldbook
         const page=await browser.newPage({viewport:{width:393,height:900}});
         await page.goto(`http://127.0.0.1:${server.address().port}`);
         await page.waitForSelector('#cip-curiosity-add');
-        await page.selectOption('#cip-curiosity-profile','profile');
-        await page.fill('#cip-curiosity-url','http://127.0.0.1:8889');
+        assert.equal(await page.locator('#cip-curiosity-user, #cip-curiosity-profile, #cip-curiosity-url').count(), 0);
         await page.click('#cip-curiosity-add');
         await page.selectOption('.cur-char','角色');
         await page.selectOption('.cur-world','角色搜索');
@@ -51,6 +50,8 @@ test('autonomous search panel configures an independent role and bound worldbook
         assert.equal(start.body.schemes[0].worldBook,'角色搜索');
         assert.equal(start.body.schemes[0].mode,'ai');
         assert.equal(start.body.searxngUrl,'http://127.0.0.1:8889');
+        assert.equal(start.body.stUser,'u');
+        assert.equal(start.body.searxngPreferences,'pref');
         await page.evaluate(() => { const editor=document.createElement('div');editor.id='world_popup';editor.innerHTML='<select id="world_editor_select"><option value="">请选择</option><option value="0" selected>角色搜索</option></select>';document.body.append(editor);editor.querySelector('select').dispatchEvent(new Event('change',{bubbles:true})); });
         await page.waitForTimeout(600);
         assert.ok(posts.some(item=>item.url.endsWith('/curiosity/editor') && item.body.book==='角色搜索'));

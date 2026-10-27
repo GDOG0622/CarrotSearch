@@ -29,7 +29,7 @@ function stopUser(user) {
 
 function validateConfig(user, config, store) {
     if (!user || !support.listUsers().includes(user)) throw new Error('酒馆用户不存在');
-    if (!config.apiProfileId) throw new Error('请先选择 API 方案');
+    if (config.searchSource && config.searchSource !== 'searxng') throw new Error('自主搜索目前只支持 SearXNG，请在上方搜索设置选择 SearXNG');
     const url = new URL(config.searxngUrl);
     if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('SearXNG 地址无效');
     if (!Array.isArray(config.schemes)) throw new Error('搜索方案无效');
@@ -77,8 +77,11 @@ function startUser(user, config) {
             }
             state.running.add(scheme.id);
             try {
+                const websearch = support.loadSettings(user)?.extension_settings?.websearch || {};
+                const effective = { ...current, searxngUrl: websearch.searxng_url ?? current.searxngUrl, searxngPreferences: websearch.searxng_preferences ?? current.searxngPreferences, searchSource: websearch.source ?? current.searchSource };
+                if (effective.searchSource && effective.searchSource !== 'searxng') throw new Error('自主搜索目前只支持 SearXNG，请在上方搜索设置选择 SearXNG');
                 const result = await runCuriosityCheck({
-                    user, config: current, scheme,
+                    user, config: effective, scheme,
                     loadCard: support.loadCharCard,
                     loadWorld: (u, b) => store.read(u, b),
                     callAI: support.callAI,
@@ -108,7 +111,8 @@ function resume() {
     for (const user of support.listUsers()) {
         try {
             const config = support.loadSettings(user)?.extension_settings?.websearch?.curiosity;
-            if (config?.enabled) startUser(user, config);
+            const websearch = support.loadSettings(user)?.extension_settings?.websearch || {};
+            if (config?.enabled) startUser(user, { ...config, searxngUrl: websearch.searxng_url ?? config.searxngUrl, searxngPreferences: websearch.searxng_preferences ?? config.searxngPreferences, searchSource: websearch.source });
         } catch (error) { console.warn(`[carrotsearch-plugin] 无法恢复自主搜索：${error.message}`); }
     }
 }
