@@ -32,6 +32,16 @@
     align-self: flex-end;
 }
 
+.websearch-config {
+    width: 100%;
+}
+
+.websearch-config > summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.45em 0;
+}
+
 /* Reuses ST's reasoning details; source chat records stay untouched. */
 #chat .mes.carrotsearch-timeline-source {
     display: none !important;
