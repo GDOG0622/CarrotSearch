@@ -153,3 +153,24 @@
     overflow-wrap: normal;
     flex: 0 0 auto;
 }
+
+.carrotsearch-history { margin: 1em 0; padding: 1em; border: 1px solid var(--SmartThemeBorderColor, #8886); border-radius: 14px; background: var(--SmartThemeBlurTintColor, #8881); min-width: 0; }
+.carrotsearch-history-header { display: flex; align-items: center; justify-content: space-between; gap: 1em; font-size: 1.15em; }
+.carrotsearch-history-picker { position: relative; flex: 0 0 auto; }
+.carrotsearch-history-picker summary { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; list-style: none; display: grid; place-items: center; overflow: hidden; background: var(--SmartThemeQuoteColor, #8886); }
+.carrotsearch-history-picker summary::-webkit-details-marker { display: none; }
+.carrotsearch-history-picker summary img, .carrotsearch-history-avatar-fallback { grid-area: 1 / 1; width: 100%; height: 100%; object-fit: cover; }
+.carrotsearch-history-picker summary img { z-index: 1; }
+.carrotsearch-history-avatar-fallback { display: grid; place-items: center; font-size: .8em; }
+.carrotsearch-history-menu { position: absolute; right: 0; z-index: 10; min-width: 160px; max-height: 240px; overflow: auto; padding: .35em; border: 1px solid var(--SmartThemeBorderColor, #8886); border-radius: 10px; background: var(--SmartThemeBlurTintColor, #333); box-shadow: 0 4px 16px #0005; }
+.carrotsearch-history-menu button { width: 100%; display: flex; align-items: center; gap: .6em; background: transparent; color: inherit; border: 0; border-radius: 6px; padding: .4em; cursor: pointer; text-align: left; }
+.carrotsearch-history-menu button[aria-pressed="true"] { background: #8884; }
+.carrotsearch-history-menu img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+.carrotsearch-history-list { max-height: 360px; overflow-y: auto; }
+.carrotsearch-history-date { font-weight: 600; margin: 1em 0 .4em; }
+.carrotsearch-history-row { display: flex; align-items: center; gap: .7em; padding: .55em .2em; color: inherit; text-decoration: none; border-radius: 6px; }
+.carrotsearch-history-row:hover { background: #8882; }
+.carrotsearch-history-icon { flex: 0 0 auto; font-size: 1.2em; }
+.carrotsearch-history-title { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.carrotsearch-history-row time { flex: 0 0 auto; opacity: .7; }
+.carrotsearch-history-empty { opacity: .7; padding: 1em 0 .3em; }

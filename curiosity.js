@@ -1,3 +1,4 @@
+import { initSearchHistory } from './search-history.js';
 import { extension_settings } from '../../../extensions.js';
 import { getRequestHeaders, saveSettingsDebounced } from '../../../../script.js';
 
@@ -16,6 +17,7 @@ export function initCuriosity() {
     const container = document.getElementById('curiosity-container');
     if (!container) return;
     const config = extension_settings.websearch.curiosity;
+    const history = initSearchHistory(document.getElementById('carrotsearch-history'), config, request);
     let chars = [], worlds = [], status = '';
     let timer = null, revision = 0, queue = Promise.resolve(), promptReady = false;
     const bookRevisions = new Map();
@@ -132,6 +134,7 @@ export function initCuriosity() {
                     const result = await request(`${API}/curiosity/run-now`, { stUser: config.stUser, id: scheme.id });
                     updateStatus(result.searched ? '已完成搜索并保存到世界书' : '角色这次决定不搜索');
                     await syncWorldCaches();
+                    await history.refresh();
                 } catch (error) { updateStatus(`检查失败：${error.message}`); }
                 finally { button.disabled = false; }
             };
@@ -167,6 +170,7 @@ export function initCuriosity() {
         return card;
     }
     function render() {
+        history.render();
         container.innerHTML = `<label class="checkbox_label"><input id="cip-curiosity-enabled" type="checkbox" ${config.enabled ? 'checked' : ''}>启用自主搜索</label>
             <small>自主搜索需要独立的 CarrotSearch 服务端插件。<a href="https://github.com/GDOG0622/CarrotSearch#角色自主搜索" target="_blank" rel="noopener noreferrer">查看安装说明</a></small>
             <small>使用当前酒馆用户、当前 AI 连接与模型，以及上方选择的搜索来源和配置。AI 连接目前支持自定义 OpenAI 兼容接口。</small>
@@ -209,6 +213,7 @@ export function initCuriosity() {
             const generationEvent = context?.eventTypes?.GENERATION_STARTED;
             if (generationEvent) context.eventSource.on(generationEvent, syncWorldCaches);
             setInterval(syncWorldCaches, 15000);
+            setInterval(() => history.refresh(), 15000);
             setInterval(updateEditorPresence, 5000);
             document.addEventListener('click', scheduleEditorPresence);
             document.addEventListener('change', scheduleEditorPresence);
