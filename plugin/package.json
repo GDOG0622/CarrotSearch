@@ -1,0 +1,10 @@
+{
+  "name": "carrotsearch-plugin",
+  "version": "1.4.0",
+  "private": true,
+  "description": "CarrotSearch autonomous search server plugin",
+  "main": "index.js",
+  "dependencies": {
+    "cheerio": "1.0.0-rc.12"
+  }
+}

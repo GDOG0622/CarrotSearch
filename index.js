@@ -12,6 +12,8 @@ import { commonEnumProviders } from '../../../slash-commands/SlashCommandCommonE
 import { localforage } from '../../../../lib.js';
 import { textgen_types, textgenerationwebui_settings } from '../../../textgen-settings.js';
 import { initReasoningTimeline, setPendingTool } from './reasoning-timeline.js';
+import { initCuriosity } from './curiosity.js';
+import { migrateCuriositySettings } from './curiosity-settings.js';
 
 const { ensureMessageMediaIsArray } = SillyTavern.getContext();
 const supportsMediaArrays = typeof ensureMessageMediaIsArray === 'function';
@@ -126,6 +128,16 @@ const defaultSettings = {
     searxng_url: '',
     searxng_preferences: '',
     include_images: false,
+    curiosity: {
+        enabled: false,
+        stUser: '',
+        apiProfileId: '',
+        apiModel: '',
+        customPrompt: null,
+        searxngUrl: '',
+        searxngPreferences: '',
+        schemes: [],
+    },
 };
 
 /**
@@ -1639,14 +1651,22 @@ async function handleApiKeyManagement(keyType, serviceName, buttonElement) {
 jQuery(async () => {
     initReasoningTimeline();
     if (!extension_settings.websearch) {
-        extension_settings.websearch = structuredClone(defaultSettings);
+        extension_settings.websearch = {};
+    }
+
+    if (migrateCuriositySettings(extension_settings.websearch, extension_settings.carrot?.curiosity)) {
+        saveSettingsDebounced();
     }
 
     for (const key of Object.keys(defaultSettings)) {
         if (extension_settings.websearch[key] === undefined) {
-            extension_settings.websearch[key] = defaultSettings[key];
+            extension_settings.websearch[key] = structuredClone(defaultSettings[key]);
         }
     }
+    if (!extension_settings.websearch.curiosity || typeof extension_settings.websearch.curiosity !== 'object') {
+        extension_settings.websearch.curiosity = structuredClone(defaultSettings.curiosity);
+    }
+    if (!Array.isArray(extension_settings.websearch.curiosity.schemes)) extension_settings.websearch.curiosity.schemes = [];
 
     const html = await renderExtensionTemplateAsync(extensionTemplatePath, 'settings');
 
@@ -1666,6 +1686,7 @@ jQuery(async () => {
 
     const getContainer = () => $(document.getElementById('websearch_container') ?? document.getElementById('extensions_settings2'));
     getContainer().append(html);
+    initCuriosity();
     $('#websearch_source').val(extension_settings.websearch.source);
     $('#websearch_source').on('change', () => {
         extension_settings.websearch.source = String($('#websearch_source').find(':selected').val());
