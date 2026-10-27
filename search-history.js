@@ -35,7 +35,8 @@ export function initSearchHistory(container, config, request) {
             const heading = date !== previous ? `<div class="carrotsearch-history-date">${escape(date)}</div>` : '';
             previous = date;
             const time = item.timestamp.match(/\b(\d{2}:\d{2})/)?.[1] || '';
-            return `${heading}<a class="carrotsearch-history-row" href="${escape(item.url)}" target="_blank" rel="noopener noreferrer" title="${escape(item.url)}"><span class="carrotsearch-history-icon" aria-hidden="true">◎</span><span class="carrotsearch-history-title">${escape(item.title)}</span><time>${escape(time)}</time></a>`;
+            const favicon = new URL('/favicon.ico', item.url).href;
+            return `${heading}<a class="carrotsearch-history-row" href="${escape(item.url)}" target="_blank" rel="noopener noreferrer" title="${escape(item.url)}"><span class="carrotsearch-history-icon" aria-hidden="true"><span>◎</span><img src="${escape(favicon)}" alt="" loading="lazy" referrerpolicy="no-referrer"></span><span class="carrotsearch-history-title">${escape(item.title)}</span><time>${escape(time)}</time></a>`;
         }).join('');
         container.innerHTML = `<div class="carrotsearch-history-header"><strong>历史记录</strong>${picker}</div><div class="carrotsearch-history-list">${message ? `<div class="carrotsearch-history-empty">${escape(message)}</div>` : rows || `<div class="carrotsearch-history-empty">${active ? '这个角色还没有搜索记录' : '添加角色搜索方案后，可在这里查看历史记录'}</div>`}</div>`;
         container.querySelectorAll('img').forEach(img => { img.onerror = () => { img.style.display = 'none'; }; });

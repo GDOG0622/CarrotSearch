@@ -9,7 +9,7 @@
     "css": "style.css",
     "author": "Cohee1207",
     "generate_interceptor": "WebSearch_Intercept",
-    "version": "1.4.3",
+    "version": "1.4.4",
     "homePage": "https://github.com/GDOG0622/carrotsearch",
     "auto_update": true
 }

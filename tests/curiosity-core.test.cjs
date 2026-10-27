@@ -24,6 +24,9 @@ test('summary needs actual separated keywords, a title and content', () => {
 test('creates a disabled detailed entry and a green keyword-triggered summary at system depth one', () => {
     const [detail, summary] = makeEntries({ firstUid: 10, timestamp: '2026-10-27 14:30', query: '猫', results: [{ title: '文章', url: 'https://example.com', content: '内容' }], summary: { title: '纸箱', summary: '搜索摘要', keywords: ['猫', '纸箱'] }, runId: 'one' });
     assert.equal(detail.disable, true);
+    assert.match(detail.comment, /2026-10-27 14:30/);
+    assert.equal(summary.content, '时间：2026-10-27 14:30\n搜索摘要');
+    assert.match(summary.comment, /2026-10-27 14:30/);
     assert.match(detail.content, /2026-10-27 14:30[\s\S]*https:\/\/example.com[\s\S]*内容/);
     assert.equal(summary.uid, 11);
     assert.equal(summary.disable, false);
@@ -37,4 +40,12 @@ test('creates a disabled detailed entry and a green keyword-triggered summary at
     assert.equal(summary.preventRecursion, true);
     assert.equal(summary.delayUntilRecursion, false);
     assert.deepEqual(summary.key, ['猫', '纸箱']);
+});
+
+
+test('long generated summaries retain time and fit within 250 characters', () => {
+    const [,entry] = makeEntries({ firstUid: 0, timestamp:'2026-10-27 14:30:00', query:'猫', results:[], summary:{title:'猫',summary:'好奇'.repeat(180),keywords:['猫']},runId:'id' });
+    assert.ok(entry.content.startsWith('时间：2026-10-27 14:30:00\n'));
+    assert.ok(Array.from(entry.content).length <= 250);
+    assert.ok(entry.content.endsWith('…'));
 });
