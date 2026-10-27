@@ -31,3 +31,92 @@
 #websearch_regex_add {
     align-self: flex-end;
 }
+
+/* Reuses ST's reasoning details; source chat records stay untouched. */
+#chat .mes.carrotsearch-timeline-source {
+    display: none !important;
+}
+
+#chat .mes.carrotsearch-timeline-host:not(.carrotsearch-original-mode) .mes_reasoning_details {
+    display: block !important;
+}
+
+#chat .mes.carrotsearch-timeline-host:not(.carrotsearch-original-mode) .mes_reasoning,
+#chat .mes.carrotsearch-timeline-host:not(.carrotsearch-original-mode) .mes_reasoning_actions,
+#chat .mes.carrotsearch-tool-host:not(.carrotsearch-original-mode) .mes_text {
+    display: none !important;
+}
+
+#chat .mes.carrotsearch-timeline-host:not(.carrotsearch-original-mode) .mes_reasoning_arrow {
+    display: block;
+}
+
+.carrotsearch-original-mode .carrotsearch-timeline {
+    display: none;
+}
+
+.carrotsearch-timeline {
+    border-left: 2px solid var(--reasoning-body-color, currentColor);
+    padding: 5px 0 5px 14px;
+    overflow-wrap: anywhere;
+}
+
+.carrotsearch-pending-host {
+    padding: 0.5em 1em;
+}
+
+.carrotsearch-reasoning-part {
+    color: var(--reasoning-body-color, inherit);
+}
+
+.carrotsearch-tool-card {
+    margin: 0.65em 0;
+    padding: 0.65em 0.8em;
+    border: 1px solid var(--SmartThemeBorderColor, #8886);
+    border-radius: 8px;
+    background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+.carrotsearch-tool-title {
+    font-weight: 600;
+}
+
+.carrotsearch-tool-query,
+.carrotsearch-tool-status,
+.carrotsearch-result {
+    margin-top: 0.25em;
+}
+
+.carrotsearch-tool-status,
+.carrotsearch-original-toggle {
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+.carrotsearch-tool-error {
+    color: #dc6666;
+}
+
+.carrotsearch-result summary {
+    cursor: pointer;
+}
+
+.carrotsearch-result-link {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.carrotsearch-result-text {
+    margin-top: 0.5em;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.carrotsearch-original-toggle {
+    display: block;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.2em 0;
+}

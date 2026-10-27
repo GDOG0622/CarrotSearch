@@ -11,6 +11,7 @@ import { ARGUMENT_TYPE, SlashCommandArgument, SlashCommandNamedArgument } from '
 import { commonEnumProviders } from '../../../slash-commands/SlashCommandCommonEnumsProvider.js';
 import { localforage } from '../../../../lib.js';
 import { textgen_types, textgenerationwebui_settings } from '../../../textgen-settings.js';
+import { initReasoningTimeline, setPendingTool } from './reasoning-timeline.js';
 
 const { ensureMessageMediaIsArray } = SillyTavern.getContext();
 const supportsMediaArrays = typeof ensureMessageMediaIsArray === 'function';
@@ -1557,11 +1558,15 @@ function registerFunctionTools() {
             parameters: webSearchSchema,
             formatMessage: (args) => args?.query ? `Searching the web for: ${args?.query}` : '',
             action: async (args) => {
-                if (!args) throw new Error('No arguments provided');
-                if (!args.query) throw new Error('No query provided');
-                if (!(await isSearchAvailable())) throw new Error('Search is not available');
-                const search = await performSearchRequest(args.query, { useCache: true });
-                return search;
+                setPendingTool('WebSearch', args);
+                try {
+                    if (!args) throw new Error('No arguments provided');
+                    if (!args.query) throw new Error('No query provided');
+                    if (!(await isSearchAvailable())) throw new Error('Search is not available');
+                    return await performSearchRequest(args.query, { useCache: true });
+                } finally {
+                    setPendingTool(null);
+                }
             },
         });
 
@@ -1572,24 +1577,28 @@ function registerFunctionTools() {
             parameters: visitLinksSchema,
             formatMessage: (args) => args?.links ? 'Visiting the web links' : '',
             action: async (args) => {
-                if (!args) throw new Error('No arguments provided');
-                if (!args.links) throw new Error('No links provided');
-                if (!(await isSearchAvailable())) throw new Error('Search is not available');
-                const visitResults = [];
+                setPendingTool('VisitLinks', args);
+                try {
+                    if (!args) throw new Error('No arguments provided');
+                    if (!args.links) throw new Error('No links provided');
+                    if (!(await isSearchAvailable())) throw new Error('Search is not available');
+                    const visitResults = [];
 
-                for (const link of args.links) {
-                    if (!isAllowedUrl(link)) {
-                        continue;
+                    for (const link of args.links) {
+                        if (!isAllowedUrl(link)) {
+                            continue;
+                        }
+
+                        const visitResult = await visitLink(link);
+
+                        if (visitResult) {
+                            visitResults.push(visitResult);
+                        }
                     }
-
-                    const visitResult = await visitLink(link);
-
-                    if (visitResult) {
-                        visitResults.push(visitResult);
-                    }
+                    return visitResults;
+                } finally {
+                    setPendingTool(null);
                 }
-
-                return visitResults;
             },
         });
     } catch (error) {
@@ -1628,6 +1637,7 @@ async function handleApiKeyManagement(keyType, serviceName, buttonElement) {
 
 
 jQuery(async () => {
+    initReasoningTimeline();
     if (!extension_settings.websearch) {
         extension_settings.websearch = structuredClone(defaultSettings);
     }
